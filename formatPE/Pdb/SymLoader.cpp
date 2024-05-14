@@ -10,10 +10,10 @@ namespace Scoped
 
 class Inet
 {
-private:
+  private:
     HINTERNET m_hInet;
 
-public:
+  public:
     Inet() : m_hInet(nullptr)
     {
     }
@@ -118,8 +118,6 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
         return INVALID_HANDLE_VALUE;
     }
 
-    wchar_t* const pathBuf = &path[0];
-
     size_t lastSkippedSlash = 0;
 
     const auto isSlash = [](const wchar_t sym) -> bool
@@ -129,7 +127,7 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
 
     if (path.size() >= 3)
     {
-        if ((pathBuf[1] == L':') && isSlash(pathBuf[2]))
+        if ((path[1] == L':') && isSlash(path[2]))
         {
             // "X:\..."
             //    ^
@@ -137,11 +135,12 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
         }
         else if (path.size() >= 4)
         {
-            if ((*reinterpret_cast<const unsigned int*>(pathBuf) == '\\.\\\\') || (*reinterpret_cast<const unsigned int*>(pathBuf) == '\\??\\'))
+            if ((path.starts_with(L"\\.\\\\")) || (path.starts_with(L"\\??\\")))
             {
-                for (size_t i = 4; i < path.size(); ++i)
+                size_t i = 4;
+                for (auto it = path.cbegin() + i; it != path.cend(); ++it, ++i)
                 {
-                    if (isSlash(pathBuf[i]))
+                    if (isSlash(*it))
                     {
                         // "\\.\Root\..."
                         // "\??\Root\..."
@@ -157,14 +156,15 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
     std::vector<size_t> createdDirs;
     createdDirs.reserve(10);
 
-    const auto discardChanges = [](const std::vector<size_t> dirs, wchar_t* const mutablePath)
+    const auto discardChanges = [](const std::vector<size_t> dirs, std::wstring path)
     {
         for (auto it = dirs.crbegin(); it != dirs.crend(); ++it)
         {
             const size_t slashPos = *it;
-            const wchar_t backupDelim = mutablePath[slashPos];
-            RemoveDirectoryW(mutablePath);
-            mutablePath[slashPos] = backupDelim;
+            const wchar_t delim = path[slashPos];
+            path[slashPos] = L'\0';
+            RemoveDirectoryW(path.c_str());
+            path[slashPos] = delim;
         }
     };
 
@@ -181,7 +181,8 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
         {
             const wchar_t delim = sym;
             sym = L'\0';
-            const bool status = !!CreateDirectoryW(pathBuf, nullptr);
+            const bool status = !!CreateDirectoryW(path.c_str(), nullptr);
+            sym = delim;
             if (status)
             {
                 createdDirs.emplace_back(symPos);
@@ -192,12 +193,10 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
                 if (lastError != ERROR_ALREADY_EXISTS)
                 {
                     // Discard created directories:
-                    sym = delim;
-                    discardChanges(createdDirs, pathBuf);
+                    discardChanges(createdDirs, path);
                     return INVALID_HANDLE_VALUE;
                 }
             }
-            sym = delim;
         }
 
         ++symPos;
@@ -207,7 +206,7 @@ HANDLE WinInetFileDownloader::createFileWithHierarchy(const wchar_t* filePath, c
     if (hFile == INVALID_HANDLE_VALUE)
     {
         // Discard created directories:
-        discardChanges(createdDirs, pathBuf);
+        discardChanges(createdDirs, path);
         return INVALID_HANDLE_VALUE;
     }
 

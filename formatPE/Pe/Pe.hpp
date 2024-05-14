@@ -2049,8 +2049,8 @@ namespace CodeView
 
 enum class CodeViewMagic : unsigned int
 {
-    pdb70 = 'SDSR', // RSDS
-    pdb20 = '01BN', // NB10
+    pdb70 = 0x53445352, // 'SDSR' : RSDS
+    pdb20 = 0x4E423130, // '01BN' : NB10
 };
 
 struct DebugInfoPdb20
