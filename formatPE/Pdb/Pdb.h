@@ -1044,7 +1044,7 @@ public:
     template <typename Type>
     bool equals() const
     {
-        return Type::typeof(*this);
+        return Type::typeof_(*this);
     }
 };
 
@@ -1056,7 +1056,7 @@ class TagClassificator
 public:
     static constexpr auto k_tag = tag;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return sym.tag() == k_tag;
     }
@@ -1077,7 +1077,7 @@ public:
     static constexpr auto k_tag = SymTag::Data;
     static constexpr auto k_kind = kind;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return (sym.tag() == k_tag) && (DataKindExposer(sym.mod(), sym.id()).dataKind() == k_kind);
     }
@@ -1098,7 +1098,7 @@ public:
     static constexpr auto k_tag = SymTag::UDT;
     static constexpr auto k_kind = kind;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return (sym.tag() == k_tag) && (UdtKindExposer(sym.mod(), sym.id()).udtKind() == k_kind);
     }
