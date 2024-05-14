@@ -1154,6 +1154,10 @@ public:
             {
                 return L"double";
             }
+            default: {
+                assert(!"Unsupported type.");
+                return L"";
+            }
             }
         }
         else if (len == 16)
@@ -1175,6 +1179,11 @@ public:
             case BaseType::ULong:
             {
                 return TypeHolder<BaseType>(BaseType::UInt128).name();
+            }
+            default:
+            {
+                assert(!"Unsupported type.");
+                return L"";
             }
             }
         }

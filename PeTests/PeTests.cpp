@@ -60,6 +60,11 @@ void parsePe(const PeObject& pe)
                     printf("    Ordinal: %u\n", static_cast<unsigned int>(fn.ordinal()));
                     break;
                 }
+                default:
+                {
+                    assert(fn.type() != Pe::ImportType::name && fn.type() != Pe::ImportType::ordinal);
+                    break;
+                }
                 }
             }
         }
@@ -84,6 +89,11 @@ void parsePe(const PeObject& pe)
                 printf("[%u] Forwarder: %s\n", exp.ordinal(), exp.forwarder());
                 break;
             }
+            default:
+            {
+                assert(exp.type() != Pe::ExportType::exact && exp.type() != Pe::ExportType::forwarder);
+                break;
+            }
             }
 
             if (exp.hasName())
@@ -101,6 +111,11 @@ void parsePe(const PeObject& pe)
                 case Pe::ExportType::forwarder:
                 {
                     assert(byName.forwarder() == exp.forwarder());
+                    break;
+                }
+                default:
+                {
+                    assert(byName.type() != Pe::ExportType::exact && byName.type() != Pe::ExportType::forwarder);
                     break;
                 }
                 }
