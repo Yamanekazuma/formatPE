@@ -314,8 +314,8 @@ template <Arch> class Debug;
 
 struct PeMagic
 {
-    static constexpr auto k_mz = 0x5A4Dui16; // MZ
-    static constexpr auto k_pe = 0x00004550ui32; // "PE\0\0"
+    static constexpr uint16_t k_mz = 0x5A4D;     // MZ
+    static constexpr uint32_t k_pe = 0x00004550; // "PE\0\0"
 };
 
 template <Arch arch>
