@@ -130,7 +130,7 @@ void parsePe(const PeObject& pe)
         printf("Relocs:\n");
         for (const auto& relocEntry : pe.relocs())
         {
-            printf("  Page 0x%X:\n", relocEntry.descriptor()->VirtualAddress);
+            printf("  Page 0x%lX:\n", relocEntry.descriptor()->VirtualAddress);
             for (const auto& reloc : relocEntry)
             {
                 switch (reloc.reloc()->type())
@@ -220,7 +220,7 @@ void parsePe(const PeObject& pe)
                     case Pe::CodeView::CodeViewMagic::pdb70:
                     {
                         const auto& pdb = codeView->pdb70;
-                        printf("        CodeView PDB 7.0 path: '%s\\%08X%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X%X\\%s'\n",
+                        printf("        CodeView PDB 7.0 path: '%s\\%08lX%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X%X\\%s'\n",
                             pdb.pdbName,
                             pdb.guid.Data1, pdb.guid.Data2, pdb.guid.Data3,
                             pdb.guid.Data4[0], pdb.guid.Data4[1], pdb.guid.Data4[2], pdb.guid.Data4[3], pdb.guid.Data4[4], pdb.guid.Data4[5], pdb.guid.Data4[6], pdb.guid.Data4[7],
