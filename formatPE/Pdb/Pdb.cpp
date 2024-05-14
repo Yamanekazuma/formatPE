@@ -22,7 +22,7 @@ InstUid Prov::uid()
 {
     if (!s_initCount)
     {
-        throw NotInitialized(__FUNCTIONW__ L": A symbols provider isn't created yet. Create the Pdb::Prov instance before the call.");
+        throw NotInitialized(L"A symbols provider isn't created yet. Create the Pdb::Prov instance before the call.");
     }
     return &s_initCount;
 }
@@ -54,7 +54,7 @@ PdbInfo PdbInfo::get(const wchar_t* const path) noexcept(false)
     if (!status)
     {
         const auto lastError = GetLastError();
-        throw DbgHelpFailure(__FUNCTIONW__ L": Unable to get a file index info.", lastError);
+        throw DbgHelpFailure(L"Unable to get a file index info.", lastError);
     }
 
     PdbInfo pdbInfo;
@@ -217,7 +217,7 @@ Prov::Prov(const wchar_t* symPath) noexcept(false)
         if (!status)
         {
             const auto lastError = GetLastError();
-            throw DbgHelpFailure(__FUNCTIONW__ L": Unable to create the Prov instance: 'SymInitializeW' failure.", lastError);
+            throw DbgHelpFailure(L"Unable to create the Prov instance: 'SymInitializeW' failure.", lastError);
         }
 
         const auto options = getOptions();
@@ -261,7 +261,7 @@ std::wstring Prov::getSymPath() const noexcept(false)
         const auto lastError = GetLastError();
         if (lastError != ERROR_INSUFFICIENT_BUFFER)
         {
-            throw DbgHelpFailure(__FUNCTIONW__ L": Unable to obtain a symbol path: 'SymGetSearchPathW' failure.", lastError);
+            throw DbgHelpFailure(L"Unable to obtain a symbol path: 'SymGetSearchPathW' failure.", lastError);
         }
 
         buf.resize(buf.size() + k_sizeStep);
@@ -274,7 +274,7 @@ void Prov::setSymPath(const wchar_t* symPath) noexcept(false)
     if (!status)
     {
         const auto lastError = GetLastError();
-        throw DbgHelpFailure(__FUNCTIONW__ L": Unable to set a symbol path: 'SymSetSearchPathW' failure.", lastError);
+        throw DbgHelpFailure(L"Unable to set a symbol path: 'SymSetSearchPathW' failure.", lastError);
     }
 }
 
@@ -474,7 +474,7 @@ Sym Children::find(const wchar_t* name) const noexcept(false)
 {
     if (!name)
     {
-        throw SymNotFound(__FUNCTIONW__ L": Name is NULL.", L"<null>");
+        throw SymNotFound(L"Name is NULL.", L"<null>");
     }
 
     for (const auto sym : *this)
@@ -486,7 +486,7 @@ Sym Children::find(const wchar_t* name) const noexcept(false)
         }
     }
 
-    throw SymNotFound(std::wstring(__FUNCTIONW__ ": Symbol '").append(name).append(L"' not found."), name);
+    throw SymNotFound(std::wstring(L"Symbol '").append(name).append(L"' not found."), name);
 }
 
 Children::Iterator Children::begin() const
@@ -583,7 +583,7 @@ void Sym::query(SymInfo info, void* buf) const noexcept(false)
     {
         //VARIANT var;
         const auto lastError = GetLastError();
-        throw DbgHelpFailure(__FUNCTIONW__ L": Unable to query a symbol info: 'SymGetTypeInfo' failure.", lastError);
+        throw DbgHelpFailure(L"Unable to query a symbol info: 'SymGetTypeInfo' failure.", lastError);
     }
 }
 
@@ -753,7 +753,7 @@ Mod::Mod(const wchar_t* path, const wchar_t* synonym, uint64_t imageBase, uint32
     if (!m_base)
     {
         const auto lastError = GetLastError();
-        throw DbgHelpFailure(__FUNCTIONW__ L": Unable to load module: 'SymLoadModuleExW' failure.", lastError);
+        throw DbgHelpFailure(L"Unable to load module: 'SymLoadModuleExW' failure.", lastError);
     }
 }
 
@@ -789,7 +789,7 @@ Sym Mod::find(const wchar_t* name) const noexcept(false)
 {
     if (!name)
     {
-        throw SymNotFound(__FUNCTIONW__ L": Name is NULL.", L"<null>");
+        throw SymNotFound(L"Name is NULL.", L"<null>");
     }
 
     constexpr auto k_size = sizeof(SYMBOL_INFOW) + MAX_SYM_NAME * sizeof(wchar_t);
@@ -806,12 +806,12 @@ Sym Mod::find(const wchar_t* name) const noexcept(false)
         {
         case ERROR_INVALID_FUNCTION:
         {
-            throw SymNotFound(std::wstring(__FUNCTIONW__ ": Symbol '").append(name).append(L"' not found."), name);
+            throw SymNotFound(std::wstring(L"Symbol '").append(name).append(L"' not found."), name);
         }
         case ERROR_INVALID_PARAMETER:
         {
             throw DbgHelpFailure(
-                __FUNCTIONW__ L": Unable to get type from name: 'SymGetTypeFromNameW' failure. "
+                L"Unable to get type from name: 'SymGetTypeFromNameW' failure. "
                 "Ensure that 'symsrv.dll' and 'dbghelp.dll' are present in the folder of this program or "
                 "that symbols are present in the symbols folder.",
                 lastError
@@ -819,7 +819,7 @@ Sym Mod::find(const wchar_t* name) const noexcept(false)
         }
         default:
         {
-            throw DbgHelpFailure(__FUNCTIONW__ L": Unable to get type from name: 'SymGetTypeFromNameW' failure.", lastError);
+            throw DbgHelpFailure(L"Unable to get type from name: 'SymGetTypeFromNameW' failure.", lastError);
         }
         }
     }

@@ -5,7 +5,9 @@
 #include <string>
 #include <array>
 #include <cstdint>
-
+#include <cassert>
+#include <format>
+#include <source_location>
 
 namespace Pdb
 {
@@ -20,8 +22,18 @@ class Exception
 private:
     const std::wstring m_reason;
 
+    static inline std::wstring str2wstr(const std::string& str) noexcept
+    {
+        size_t size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+        std::wstring ret(size, L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, ret.data(), size);
+        return ret;
+    }
+
 public:
-    explicit Exception(const std::wstring& reason) : m_reason(reason)
+    explicit Exception(const std::wstring& reason,
+                       const std::source_location loc = std::source_location::current())
+        : m_reason(std::format(L"{}: {}", str2wstr(loc.function_name()), reason))
     {
     }
 
@@ -413,7 +425,7 @@ struct Variant
     {
         if (layout()->type.fields.type != type)
         {
-            throw BadCast(__FUNCTIONW__ L": Invalid type cast: types mismatch.");
+            throw BadCast(L"Invalid type cast: types mismatch.");
         }
 
         return *reinterpret_cast<const typename TypeDeductor<type>::Type*>(&layout()->views);
@@ -428,7 +440,7 @@ struct Variant
         {
             if (!variantType.fields.ptr)
             {
-                throw BadCast(__FUNCTIONW__ L": Invalid type cast of variant type: TypeSpec::ByRef was specified, but the type isn't a pointer.");
+                throw BadCast(L"Invalid type cast of variant type: TypeSpec::ByRef was specified, but the type isn't a pointer.");
             }
         }
 
@@ -1024,7 +1036,7 @@ public:
     {
         if (!equals<Type>())
         {
-            throw BadCast(__FUNCTIONW__ L": Invalid type cast.");
+            throw BadCast(L"Invalid type cast.");
         }
         return Type(mod(), id());
     }
