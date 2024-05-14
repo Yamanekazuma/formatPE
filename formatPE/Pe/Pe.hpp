@@ -6,6 +6,7 @@
 #include <winnt.h>
 #endif
 
+#include <cstdint>
 
 
 namespace Pe

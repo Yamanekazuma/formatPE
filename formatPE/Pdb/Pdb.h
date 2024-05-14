@@ -4,6 +4,7 @@
 
 #include <string>
 #include <array>
+#include <cstdint>
 
 
 namespace Pdb

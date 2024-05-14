@@ -3,6 +3,7 @@
 #include <wininet.h>
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Scoped

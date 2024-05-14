@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <utility>
 
 namespace Pdb
 {
