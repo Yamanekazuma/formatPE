@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#pragma comment(lib, "wininet.lib")
-
 namespace Scoped
 {
 

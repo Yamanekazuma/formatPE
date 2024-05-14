@@ -3,7 +3,6 @@
 #define _NO_CVCONST_H
 
 #include <DbgHelp.h>
-#pragma comment(lib, "dbghelp.lib")
 
 #include <sstream>
 #include <iomanip>
