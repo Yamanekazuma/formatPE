@@ -127,7 +127,6 @@ void parsePe(const PeObject& pe)
             }
             else
             {
-                const auto t = exp.type(); t;
                 const auto byOrdinal = exports.find(exp.ordinal());
                 if (exp.type() == Pe::ExportType::exact)
                 {
