@@ -1,4 +1,4 @@
-﻿#include <Windows.h>
+#include <Windows.h>
 
 #include <Pe/Pe.hpp>
 #include <Pdb/Pdb.h>
@@ -204,7 +204,7 @@ void parsePe(const PeObject& pe)
             printf("    Entry: %p\n", debug.debugEntry());
             if (debug.debugEntry()->Type == IMAGE_DEBUG_TYPE_CODEVIEW)
             {
-                const auto* const codeView = pe.byRva<Pe::CodeView::DebugInfo>(debug.debugEntry()->AddressOfRawData);
+                const auto* const codeView = pe.template byRva<Pe::CodeView::DebugInfo>(debug.debugEntry()->AddressOfRawData);
                 switch (codeView->magic)
                 {
                     case Pe::CodeView::CodeViewMagic::pdb20:

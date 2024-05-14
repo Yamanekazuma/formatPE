@@ -269,96 +269,6 @@ struct Variant
     template <Type type>
     struct ValueType;
 
-    template <>
-    struct ValueType<Type::Short>
-    {
-        using Type = short;
-    };
-
-    template <>
-    struct ValueType<Type::Int>
-    {
-        using Type = int;
-    };
-
-    template <>
-    struct ValueType<Type::Float>
-    {
-        using Type = float;
-    };
-
-    template <>
-    struct ValueType<Type::Double>
-    {
-        using Type = double;
-    };
-
-    template <>
-    struct ValueType<Type::Char>
-    {
-        using Type = char;
-    };
-
-    template <>
-    struct ValueType<Type::UChar>
-    {
-        using Type = unsigned char;
-    };
-
-    template <>
-    struct ValueType<Type::UShort>
-    {
-        using Type = unsigned short;
-    };
-
-    template <>
-    struct ValueType<Type::UInt>
-    {
-        using Type = unsigned int;
-    };
-
-    template <>
-    struct ValueType<Type::Int64>
-    {
-        using Type = long long;
-    };
-
-    template <>
-    struct ValueType<Type::UInt64>
-    {
-        using Type = unsigned long long;
-    };
-
-    template <>
-    struct ValueType<Type::ArchInt>
-    {
-        using Type = intptr_t;
-    };
-
-    template <>
-    struct ValueType<Type::ArchUInt>
-    {
-        using Type = size_t;
-    };
-
-    template <>
-    struct ValueType<Type::Void>
-    {
-        using Type = void;
-    };
-
-    template <>
-    struct ValueType<Type::String>
-    {
-        using Type = char;
-    };
-
-    template <>
-    struct ValueType<Type::WideString>
-    {
-        using Type = wchar_t;
-    };
-
     template <Type type, TypeSpec... spec>
     struct TypeDeductor;
 
@@ -452,6 +362,96 @@ struct Variant
     {
         return *reinterpret_cast<const ValType*>(&layout()->views);
     }
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Short>
+{
+    using Type = short;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Int>
+{
+    using Type = int;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Float>
+{
+    using Type = float;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Double>
+{
+    using Type = double;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Char>
+{
+    using Type = char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UChar>
+{
+    using Type = unsigned char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UShort>
+{
+    using Type = unsigned short;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UInt>
+{
+    using Type = unsigned int;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Int64>
+{
+    using Type = long long;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UInt64>
+{
+    using Type = unsigned long long;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::ArchInt>
+{
+    using Type = intptr_t;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::ArchUInt>
+{
+    using Type = size_t;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Void>
+{
+    using Type = void;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::String>
+{
+    using Type = char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::WideString>
+{
+    using Type = wchar_t;
 };
 
 enum class Bool : unsigned int
@@ -655,6 +655,9 @@ public:
         return type();
     }
 };
+
+template <>
+const wchar_t* const TypeHolder<BaseType>::s_names[];
 
 enum class SymInfo
 {
