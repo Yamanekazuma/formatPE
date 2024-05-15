@@ -45,7 +45,7 @@ protected:
 
 protected:
     virtual void onStart(const wchar_t* url, size_t contentLength) override;
-    virtual Action onReceive(const void* buf, size_t size);
+    virtual Action onReceive(const void* buf, size_t size) override;
     virtual void onFinish() override;
     virtual void onError(unsigned int httpCode) override;
     virtual void onCancel() override;

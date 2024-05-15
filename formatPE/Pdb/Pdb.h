@@ -4,7 +4,10 @@
 
 #include <string>
 #include <array>
-
+#include <cstdint>
+#include <cassert>
+#include <format>
+#include <source_location>
 
 namespace Pdb
 {
@@ -19,8 +22,18 @@ class Exception
 private:
     const std::wstring m_reason;
 
+    static inline std::wstring str2wstr(const std::string& str) noexcept
+    {
+        size_t size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+        std::wstring ret(size, L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, ret.data(), size);
+        return ret;
+    }
+
 public:
-    explicit Exception(const std::wstring& reason) : m_reason(reason)
+    explicit Exception(const std::wstring& reason,
+                       const std::source_location loc = std::source_location::current())
+        : m_reason(std::format(L"{}: {}", str2wstr(loc.function_name()), reason))
     {
     }
 
@@ -256,96 +269,6 @@ struct Variant
     template <Type type>
     struct ValueType;
 
-    template <>
-    struct ValueType<Type::Short>
-    {
-        using Type = short;
-    };
-
-    template <>
-    struct ValueType<Type::Int>
-    {
-        using Type = int;
-    };
-
-    template <>
-    struct ValueType<Type::Float>
-    {
-        using Type = float;
-    };
-
-    template <>
-    struct ValueType<Type::Double>
-    {
-        using Type = double;
-    };
-
-    template <>
-    struct ValueType<Type::Char>
-    {
-        using Type = char;
-    };
-
-    template <>
-    struct ValueType<Type::UChar>
-    {
-        using Type = unsigned char;
-    };
-
-    template <>
-    struct ValueType<Type::UShort>
-    {
-        using Type = unsigned short;
-    };
-
-    template <>
-    struct ValueType<Type::UInt>
-    {
-        using Type = unsigned int;
-    };
-
-    template <>
-    struct ValueType<Type::Int64>
-    {
-        using Type = long long;
-    };
-
-    template <>
-    struct ValueType<Type::UInt64>
-    {
-        using Type = unsigned long long;
-    };
-
-    template <>
-    struct ValueType<Type::ArchInt>
-    {
-        using Type = intptr_t;
-    };
-
-    template <>
-    struct ValueType<Type::ArchUInt>
-    {
-        using Type = size_t;
-    };
-
-    template <>
-    struct ValueType<Type::Void>
-    {
-        using Type = void;
-    };
-
-    template <>
-    struct ValueType<Type::String>
-    {
-        using Type = char;
-    };
-
-    template <>
-    struct ValueType<Type::WideString>
-    {
-        using Type = wchar_t;
-    };
-
     template <Type type, TypeSpec... spec>
     struct TypeDeductor;
 
@@ -412,7 +335,7 @@ struct Variant
     {
         if (layout()->type.fields.type != type)
         {
-            throw BadCast(__FUNCTIONW__ L": Invalid type cast: types mismatch.");
+            throw BadCast(L"Invalid type cast: types mismatch.");
         }
 
         return *reinterpret_cast<const typename TypeDeductor<type>::Type*>(&layout()->views);
@@ -427,7 +350,7 @@ struct Variant
         {
             if (!variantType.fields.ptr)
             {
-                throw BadCast(__FUNCTIONW__ L": Invalid type cast of variant type: TypeSpec::ByRef was specified, but the type isn't a pointer.");
+                throw BadCast(L"Invalid type cast of variant type: TypeSpec::ByRef was specified, but the type isn't a pointer.");
             }
         }
 
@@ -439,6 +362,96 @@ struct Variant
     {
         return *reinterpret_cast<const ValType*>(&layout()->views);
     }
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Short>
+{
+    using Type = short;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Int>
+{
+    using Type = int;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Float>
+{
+    using Type = float;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Double>
+{
+    using Type = double;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Char>
+{
+    using Type = char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UChar>
+{
+    using Type = unsigned char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UShort>
+{
+    using Type = unsigned short;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UInt>
+{
+    using Type = unsigned int;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Int64>
+{
+    using Type = long long;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::UInt64>
+{
+    using Type = unsigned long long;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::ArchInt>
+{
+    using Type = intptr_t;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::ArchUInt>
+{
+    using Type = size_t;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::Void>
+{
+    using Type = void;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::String>
+{
+    using Type = char;
+};
+
+template <>
+struct Variant::ValueType<Variant::Type::WideString>
+{
+    using Type = wchar_t;
 };
 
 enum class Bool : unsigned int
@@ -642,6 +655,9 @@ public:
         return type();
     }
 };
+
+template <>
+const wchar_t* const TypeHolder<BaseType>::s_names[];
 
 enum class SymInfo
 {
@@ -1023,7 +1039,7 @@ public:
     {
         if (!equals<Type>())
         {
-            throw BadCast(__FUNCTIONW__ L": Invalid type cast.");
+            throw BadCast(L"Invalid type cast.");
         }
         return Type(mod(), id());
     }
@@ -1031,7 +1047,7 @@ public:
     template <typename Type>
     bool equals() const
     {
-        return Type::typeof(*this);
+        return Type::typeof_(*this);
     }
 };
 
@@ -1043,7 +1059,7 @@ class TagClassificator
 public:
     static constexpr auto k_tag = tag;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return sym.tag() == k_tag;
     }
@@ -1064,7 +1080,7 @@ public:
     static constexpr auto k_tag = SymTag::Data;
     static constexpr auto k_kind = kind;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return (sym.tag() == k_tag) && (DataKindExposer(sym.mod(), sym.id()).dataKind() == k_kind);
     }
@@ -1085,7 +1101,7 @@ public:
     static constexpr auto k_tag = SymTag::UDT;
     static constexpr auto k_kind = kind;
 
-    static bool typeof(const Sym& sym) noexcept(false)
+    static bool typeof_(const Sym& sym) noexcept(false)
     {
         return (sym.tag() == k_tag) && (UdtKindExposer(sym.mod(), sym.id()).udtKind() == k_kind);
     }
@@ -1138,6 +1154,10 @@ public:
             {
                 return L"double";
             }
+            default: {
+                assert(!"Unsupported type.");
+                return L"";
+            }
             }
         }
         else if (len == 16)
@@ -1159,6 +1179,11 @@ public:
             case BaseType::ULong:
             {
                 return TypeHolder<BaseType>(BaseType::UInt128).name();
+            }
+            default:
+            {
+                assert(!"Unsupported type.");
+                return L"";
             }
             }
         }

@@ -74,8 +74,21 @@ set_target_properties(
     "${formatPE_NAME}_Pdb"
     "${formatPE_NAME}_SymLoader"
     "PeTests"
-    PROPERTIES 
+    PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PLATFORM_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PLATFORM_DIR}/lib"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${PLATFORM_DIR}/bin"
+)
+
+
+target_link_libraries(
+  "${formatPE_NAME}_Pdb"
+  PRIVATE
+  "dbghelp.lib"
+)
+
+target_link_libraries(
+  "${formatPE_NAME}_SymLoader"
+  PRIVATE
+  "Wininet.lib"
 )

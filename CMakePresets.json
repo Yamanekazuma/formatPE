@@ -1,0 +1,101 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "x86-clang",
+      "hidden": true,
+      "inherits": "clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_ARG1": "-m32",
+        "CMAKE_CXX_COMPILER_ARG1": "-m32"
+      },
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x64-clang",
+      "hidden": true,
+      "inherits": "clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_ARG1": "-m64",
+        "CMAKE_CXX_COMPILER_ARG1": "-m64"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "Debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x64-Debug",
+      "displayName": "Debug build with Clang for x64",
+      "inherits": [
+        "windows-base",
+        "x64-clang",
+        "Debug"
+      ]
+    },
+    {
+      "name": "x86-Debug",
+      "displayName": "Debug build with Clang for x86",
+      "inherits": [
+        "windows-base",
+        "x86-clang",
+        "Debug"
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "displayName": "Release build with Clang for x64",
+      "inherits": [
+        "windows-base",
+        "x64-clang",
+        "Release"
+      ]
+    },
+    {
+      "name": "x86-Release",
+      "displayName": "Release build with Clang for x86",
+      "inherits": [
+        "windows-base",
+        "x86-clang",
+        "Release"
+      ]
+    }
+  ]
+}

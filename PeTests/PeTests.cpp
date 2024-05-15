@@ -1,4 +1,4 @@
-﻿#include <Windows.h>
+#include <Windows.h>
 
 #include <Pe/Pe.hpp>
 #include <Pdb/Pdb.h>
@@ -60,6 +60,11 @@ void parsePe(const PeObject& pe)
                     printf("    Ordinal: %u\n", static_cast<unsigned int>(fn.ordinal()));
                     break;
                 }
+                default:
+                {
+                    assert(fn.type() != Pe::ImportType::name && fn.type() != Pe::ImportType::ordinal);
+                    break;
+                }
                 }
             }
         }
@@ -84,6 +89,11 @@ void parsePe(const PeObject& pe)
                 printf("[%u] Forwarder: %s\n", exp.ordinal(), exp.forwarder());
                 break;
             }
+            default:
+            {
+                assert(exp.type() != Pe::ExportType::exact && exp.type() != Pe::ExportType::forwarder);
+                break;
+            }
             }
 
             if (exp.hasName())
@@ -103,6 +113,11 @@ void parsePe(const PeObject& pe)
                     assert(byName.forwarder() == exp.forwarder());
                     break;
                 }
+                default:
+                {
+                    assert(byName.type() != Pe::ExportType::exact && byName.type() != Pe::ExportType::forwarder);
+                    break;
+                }
                 }
 
                 const auto byOrdinal = exports.find(exp.ordinal());
@@ -112,7 +127,6 @@ void parsePe(const PeObject& pe)
             }
             else
             {
-                const auto t = exp.type(); t;
                 const auto byOrdinal = exports.find(exp.ordinal());
                 if (exp.type() == Pe::ExportType::exact)
                 {
@@ -130,7 +144,7 @@ void parsePe(const PeObject& pe)
         printf("Relocs:\n");
         for (const auto& relocEntry : pe.relocs())
         {
-            printf("  Page 0x%X:\n", relocEntry.descriptor()->VirtualAddress);
+            printf("  Page 0x%lX:\n", relocEntry.descriptor()->VirtualAddress);
             for (const auto& reloc : relocEntry)
             {
                 switch (reloc.reloc()->type())
@@ -204,7 +218,7 @@ void parsePe(const PeObject& pe)
             printf("    Entry: %p\n", debug.debugEntry());
             if (debug.debugEntry()->Type == IMAGE_DEBUG_TYPE_CODEVIEW)
             {
-                const auto* const codeView = pe.byRva<Pe::CodeView::DebugInfo>(debug.debugEntry()->AddressOfRawData);
+                const auto* const codeView = pe.template byRva<Pe::CodeView::DebugInfo>(debug.debugEntry()->AddressOfRawData);
                 switch (codeView->magic)
                 {
                     case Pe::CodeView::CodeViewMagic::pdb20:
@@ -220,7 +234,7 @@ void parsePe(const PeObject& pe)
                     case Pe::CodeView::CodeViewMagic::pdb70:
                     {
                         const auto& pdb = codeView->pdb70;
-                        printf("        CodeView PDB 7.0 path: '%s\\%08X%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X%X\\%s'\n",
+                        printf("        CodeView PDB 7.0 path: '%s\\%08lX%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X%X\\%s'\n",
                             pdb.pdbName,
                             pdb.guid.Data1, pdb.guid.Data2, pdb.guid.Data3,
                             pdb.guid.Data4[0], pdb.guid.Data4[1], pdb.guid.Data4[2], pdb.guid.Data4[3], pdb.guid.Data4[4], pdb.guid.Data4[5], pdb.guid.Data4[6], pdb.guid.Data4[7],
