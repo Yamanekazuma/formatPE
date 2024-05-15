@@ -1,0 +1,27 @@
+name: MSBuild
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+  jobs:
+    build:
+      strategy:
+        matrix:
+          arch: [x86, x64]
+          variants: [Debug, Release]
+
+      runs-on: windows-latest
+
+      steps:
+      -uses: actions/checkout@v3
+
+      -uses: ilammy/msvc-dec-cmd@1.13.0
+       with:
+        arch: ${{ matrix.arch }}
+
+      - name: Build
+        run: |
+          cmake --preset ${{ matrix.arch }}-${{ matrix.variants }}
+          cmake --build out/build/${{ matrix.arch }}-${{ matrix.variants }}
+          cmake --install out/build/${{ matrix.arch }}-${{ matrix.variants }}
