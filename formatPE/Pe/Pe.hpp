@@ -132,7 +132,7 @@ struct GenericTypes
     using SecHeader = IMAGE_SECTION_HEADER;
     using ImgImportByName = IMAGE_IMPORT_BY_NAME;
     using BoundForwarderRef = IMAGE_BOUND_FORWARDER_REF;
-    
+
     struct RUNTIME_FUNCTION // For x86 headers compatibility
     {
         unsigned int BeginAddress;
@@ -212,7 +212,7 @@ struct Types<Arch::x32> : public GenericTypes
     static_assert(sizeof(ImportAddressTableEntry) == sizeof(unsigned int), "Invalid size of ImportAddressTableEntry");
     using ImportLookupTableEntry = ImportAddressTableEntry;
     using ImportNameTableEntry = ImportAddressTableEntry;
-    
+
     using TlsDir = IMAGE_TLS_DIRECTORY32;
 
     static constexpr auto k_magic = 0x010Bu; // PE32
@@ -326,7 +326,7 @@ public:
     using DosHeader = typename Types::DosHeader;
     using NtHeaders = typename Types::NtHeaders;
     using OptHeader = typename Types::OptHeader;
-    
+
 public:
     static constexpr auto k_magic = Types::k_magic;
 
@@ -494,7 +494,7 @@ public:
                 return reinterpret_cast<const Type*>(static_cast<const unsigned char*>(m_base) + (sectionOffset + (rva - sectionBase)));
             }
         }
-        
+
         return nullptr;
     }
 
@@ -1553,7 +1553,7 @@ public:
         return m_pe;
     }
 
-    const Rva directoryRva() const noexcept
+    Rva directoryRva() const noexcept
     {
         return m_directory->VirtualAddress;
     }
@@ -2033,15 +2033,15 @@ namespace CodeView
 
 //
 // PDB signature:
-// 
+//
 //     PDB 2.0: "%s\\%08X%X\\%s",
 //              pdbPath,
 //              signature,
 //              age,
 //              pdbPath
-// 
+//
 //     PDB 7.0: "%s\\%08X%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X%X\\%s",
-//              pdbPath, 
+//              pdbPath,
 //              guid.Data1, guid.Data2, guid.Data3,
 //              guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7], guid.Data4[8],
 //              age,
