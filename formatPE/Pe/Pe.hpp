@@ -436,32 +436,13 @@ private:
     const void* const m_base;
     const ImgType m_type;
 
-public:
-    Pe(const ImgType type, const void* const base) noexcept : m_map(nullptr), m_base(base), m_type(type)
-    {
-    }
-
-    inline Pe(const char* const filepath)
+    inline Pe(HANDLE&& file)
     : m_map
     {
-        [&filepath]() -> HANDLE
+        [&file]() -> HANDLE
         {
-            HANDLE hFile = CreateFileA
-            (
-                filepath,
-                FILE_GENERIC_READ,
-                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                nullptr,
-                OPEN_EXISTING,
-                FILE_ATTRIBUTE_NORMAL,
-                nullptr
-            );
-            if (hFile == INVALID_HANDLE_VALUE) {
-                throw std::runtime_error("Can't open file.");
-            }
-
-            HANDLE hMap = CreateFileMappingA(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
-            CloseHandle(hFile);
+            HANDLE hMap = CreateFileMappingW(file, nullptr, PAGE_READONLY, 0, 0, nullptr);
+            CloseHandle(file);
             if (hMap == nullptr) {
                 throw std::runtime_error("Can't create file mapped object.");
             }
@@ -485,6 +466,53 @@ public:
     {
     }
 
+public:
+    Pe(const ImgType type, const void* const base) noexcept : m_map(nullptr), m_base(base), m_type(type)
+    {
+    }
+
+    inline Pe(const char* const filepath) : Pe{
+        [&filepath]() -> HANDLE {
+            HANDLE hFile = CreateFileA
+            (
+                filepath,
+                FILE_GENERIC_READ,
+                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                nullptr,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                nullptr
+            );
+            if (hFile == INVALID_HANDLE_VALUE) {
+                throw std::runtime_error("Can't open file.");
+            }
+            return hFile;
+        }()
+    }
+    {
+    }
+
+    inline Pe(const wchar_t* const filepath) : Pe{
+        [&filepath]() -> HANDLE {
+            HANDLE hFile = CreateFileW
+            (
+                filepath,
+                FILE_GENERIC_READ,
+                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                nullptr,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                nullptr
+            );
+            if (hFile == INVALID_HANDLE_VALUE) {
+                throw std::runtime_error("Can't open file.");
+            }
+            return hFile;
+        }()
+    }
+    {
+    }
+
     inline ~Pe() noexcept
     {
         if (m_map != nullptr)
@@ -500,6 +528,15 @@ public:
     }
 
     inline static Pe fromFile(const char* const filepath)
+    {
+        try {
+            return Pe{filepath};
+        } catch (...) {
+            throw;
+        }
+    }
+
+    inline static Pe fromFile(const wchar_t* const filepath)
     {
         try {
             return Pe{filepath};
