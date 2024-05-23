@@ -436,6 +436,11 @@ private:
     const void* const m_base;
     const ImgType m_type;
 
+public:
+    Pe(const ImgType type, const void* const base) noexcept : m_map(nullptr), m_base(base), m_type(type)
+    {
+    }
+
     inline Pe(const char* const filepath)
     : m_map
     {
@@ -477,11 +482,6 @@ private:
         }()
     }
     , m_type{ImgType::file}
-    {
-    }
-
-public:
-    Pe(const ImgType type, const void* const base) noexcept : m_map(nullptr), m_base(base), m_type(type)
     {
     }
 
