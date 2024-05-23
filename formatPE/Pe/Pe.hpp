@@ -7,6 +7,8 @@
 #endif
 
 #include <cstdint>
+#include <optional>
+#include <stdexcept>
 
 
 namespace Pe
@@ -430,17 +432,80 @@ public:
     using ImgDataDir = typename GenericTypes::ImgDataDir;
 
 private:
+    const HANDLE m_map;
     const void* const m_base;
     const ImgType m_type;
 
-public:
-    Pe(const ImgType type, const void* const base) noexcept : m_base(base), m_type(type)
+    inline Pe(const char* const filepath)
+    : m_map
     {
+        [&filepath]() -> HANDLE
+        {
+            HANDLE hFile = CreateFileA
+            (
+                filepath,
+                FILE_GENERIC_READ,
+                FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                nullptr,
+                OPEN_EXISTING,
+                FILE_ATTRIBUTE_NORMAL,
+                nullptr
+            );
+            if (hFile == INVALID_HANDLE_VALUE) {
+                throw std::runtime_error("Can't open file.");
+            }
+
+            HANDLE hMap = CreateFileMappingA(hFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
+            CloseHandle(hFile);
+            if (hMap == nullptr) {
+                throw std::runtime_error("Can't create file mapped object.");
+            }
+
+            return hMap;
+        }()
+    }
+    , m_base
+    {
+        [this]() -> const void*
+        {
+            const void* data = MapViewOfFile(m_map, FILE_MAP_READ, 0, 0, 0);
+            if (data == nullptr) {
+                CloseHandle(m_map);
+                throw std::runtime_error("Can't map view of file.");
+            }
+            return data;
+        }()
+    }
+    , m_type{ImgType::file}
+    {
+    }
+
+public:
+    Pe(const ImgType type, const void* const base) noexcept : m_map(nullptr), m_base(base), m_type(type)
+    {
+    }
+
+    inline ~Pe() noexcept
+    {
+        if (m_map != nullptr)
+        {
+            UnmapViewOfFile(m_base);
+            CloseHandle(m_map);
+        }
     }
 
     static Pe fromFile(const void* const buffer) noexcept
     {
         return Pe(ImgType::file, buffer);
+    }
+
+    inline static Pe fromFile(const char* const filepath)
+    {
+        try {
+            return Pe{filepath};
+        } catch (...) {
+            throw;
+        }
     }
 
     static Pe fromModule(const void* const base) noexcept
