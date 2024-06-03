@@ -513,6 +513,13 @@ public:
     {
     }
 
+    inline Pe(Pe&& other) : m_map{std::move(other.m_map)}, m_base{std::move(other.m_base)}, m_type{std::move(other.m_type)}
+    {
+        other.m_map = nullptr;
+        other.m_base = nullptr;
+        other.m_type = static_cast<ImgType>(0L);
+    }
+
     inline ~Pe() noexcept
     {
         if (m_map != nullptr)
